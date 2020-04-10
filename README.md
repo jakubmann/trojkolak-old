@@ -16,11 +16,11 @@ Slovní hra o třech kolech
 * Pokud tým nestihne uhodnout za minutu jediné slovo, nechává si ho, a další tým začne s jiným slovem
 * Pokud dojdou slova, tým který uhodnul poslední slovo si může v dalším kole přídat tolik času, kolik mu v tomto kole zbylo
 
-### První kolo
-* V prvním kole se vysvětlující hráč pouze snaží vysvětlit slovo ostatním hráčům v jeho týmu
-### Druhé kolo
-* Ve druhém kole může vysvětlující hráč k popsání slova použít pouze _jedno_ slovo
-* Po vyslovení tohoto slova už nemůže ani mluvit, ani nic spoluhráčům naznačovat
-### Třetí kolo
-* Ve třetím kole se hráč snaží slovo předvést malováním (původně pantomimou)
-* Nesmí u toho promluvit, ani naznačovat pokud se hráči v jeho týmu blíží k uhodnutí slova
+    ### První kolo
+    * V prvním kole se vysvětlující hráč pouze snaží vysvětlit slovo ostatním hráčům v jeho týmu
+    ### Druhé kolo
+    * Ve druhém kole může vysvětlující hráč k popsání slova použít pouze _jedno_ slovo
+    * Po vyslovení tohoto slova už nemůže ani mluvit, ani nic spoluhráčům naznačovat
+    ### Třetí kolo
+    * Ve třetím kole se hráč snaží slovo předvést malováním (původně pantomimou)
+    * Nesmí u toho promluvit, ani naznačovat pokud se hráči v jeho týmu blíží k uhodnutí slova
