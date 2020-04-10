@@ -15,6 +15,7 @@ Slovní hra o třech kolech
 * Když přijde stejný tým na řadu podruhé za kolo, role hráčů se vystřídá
 * Pokud tým nestihne uhodnout za minutu jediné slovo, nechává si ho, a další tým začne s jiným slovem
 * Pokud dojdou slova, tým který uhodnul poslední slovo si může v dalším kole přídat tolik času, kolik mu v tomto kole zbylo
+* Po konci každého kola se sečte počet bodů každého týmu a slova se zamíchají do dalšího kola
 
     #### První kolo
     * V prvním kole se vysvětlující hráč pouze snaží vysvětlit slovo ostatním hráčům v jeho týmu
@@ -24,3 +25,5 @@ Slovní hra o třech kolech
     #### Třetí kolo
     * Ve třetím kole se hráč snaží slovo předvést malováním (původně pantomimou)
     * Nesmí u toho promluvit, ani naznačovat pokud se hráči v jeho týmu blíží k uhodnutí slova
+    #### Konec hry
+    * Vyhrává tým s nejvyšším počtem uhodnutých slov
