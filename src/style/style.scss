@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap');
+body {
+    background-color: #f0f0f0;
+}
+
+//colors
+$green: #6bd186;
+
+//mixins
+@mixin button {
+    border: 1px solid grey;
+    background: none;
+    padding: 5px 10px;
+    border-radius: 10px;
+    margin-left: 20px;
+
+    font: {
+        family: 'Inconsolata', monospace;
+        weight: 700;
+        size: 15px;
+    }
+    &:focus {
+        outline: none;
+    }
+}
+
+@mixin input {
+    border: 1px solid grey;
+    border-radius: 10px;
+    padding: 5px 10px;
+    font-size: 15px;
+    font: {
+        family: 'Inconsolata', monospace;
+        weight: 400;
+        size: 15px;
+    }
+    &:focus {
+        outline: none;
+    }
+}
+
+@mixin heading {
+    font: {
+        family: 'Inconsolata', monospace;
+        weight: 700;
+        size: 20px;
+    }
+}
+
+.lobby {
+    margin: 20px auto;
+    width: 90%;
+
+    &__username {
+        @include input;
+    }
+
+    &__ready, &__join{
+        @include button;
+    }
+
+    &__ready--ready {
+        background-color: $green;
+    }
+
+    .players {
+        &__heading {
+            @include heading;
+        }
+
+        &__player {
+            list-style-type: none;
+            margin-bottom: 10px;
+        }
+    }
+
+    .teams {
+        display: flex;
+        justify-content: center;
+        &__heading {
+            @include heading;
+            display: block;
+        }
+        .team {
+            border: 1px solid grey;
+            width: 20%;
+            margin: 10px;
+            &__heading {
+                @include heading;
+                font-size: 17px;
+            }
+            &__player {
+                list-style-type: none;
+                margin-bottom: 10px;
+            }
+        }
+    }
+}
