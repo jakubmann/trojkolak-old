@@ -53,15 +53,23 @@ class Lobby extends React.Component {
 
     handleKey = (e) => {
         if (e.key === 'Enter') {
-          this.join()
+            this.join()
         }
-      }
+    }
 
     ready = () => {
         this.setState({ready: this.state.ready ? false : true})
         window.setTimeout(() => {
             this.props.socket.emit('ready', this.state.ready)
-        }, 100)
+        }, 5000)
+    }
+
+
+    componentDidMount = () => {
+        this.join()
+        window.setTimeout(() => {
+            this.ready()
+        }, 1000)
     }
 
     render() {

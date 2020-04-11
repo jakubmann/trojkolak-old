@@ -30,7 +30,7 @@ class Words extends React.Component {
 
   addWord = () => {
     this.props.socket.emit('word', this.state.textInput)
-    this.setState({ textInput: '' })
+    //this.setState({ textInput: '' })
   }
 
   handleKey = (e) => {
@@ -39,7 +39,16 @@ class Words extends React.Component {
     }
   }
 
-  //value={this.state.words} max={this.props.players.length * 3}
+  componentDidMount = () => {
+    for (let i = 0; i < 3; i++) {
+      window.setTimeout(() => {
+        this.setState({textInput: Math.floor(Math.random() * 1000).toString()})
+        this.addWord()
+      }, i * 800)
+    }
+  }
+
+
 
   render() {
     return (

@@ -187,6 +187,7 @@ $red: #f54842;
         &__heading {
             @include heading;
             display: block;
+            text-align: center;
         }
         
         .team {
@@ -287,12 +288,28 @@ $red: #f54842;
 
     &__guessed {
         @include button;
+        border: none;
         display: block;
         font-size: 40px;
         padding: 10px 20px;
         margin: 0 auto;
         background-color: $green;
         border: none;
+    }
+
+    &__next {
+        @include button;
+        display: block;
+        
+        padding: 20px 30px;
+        margin: 0 auto;
+        font-weight: 700;
+        font-size: 100px;
+
+        @media screen and (max-width: 700px) {
+            font-size: 80px;
+            padding: 10px 20px;
+        }
     }
 
     &__username {
@@ -304,10 +321,6 @@ $red: #f54842;
     .teams {
         display: flex;
         justify-content: center;
-        &__heading {
-            @include heading;
-            display: block;
-        }
         
         .team {
             text-align: center;
@@ -341,5 +354,22 @@ $red: #f54842;
                 width: 100%;
             }
         }
+    }
+}
+
+
+.splash {
+    text-align: center;
+    height: 100vw;
+    height: 100vh;
+    
+    background-color: black;
+
+
+    &__text {
+        padding-top: 10%;
+        @include heading;
+        font-size: 90px;
+        color: white;
     }
 }
