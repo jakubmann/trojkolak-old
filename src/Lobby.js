@@ -45,7 +45,7 @@ class Lobby extends React.Component {
     }
 
     join = () => {
-        if (this.props.username.length > 1) {
+        if (this.props.username.length > 0) {
             this.setState({canJoin: false, canReady: true})
             this.props.join()
         }
@@ -67,10 +67,12 @@ class Lobby extends React.Component {
     render() {
         return (
             <div className="lobby">
-                <input placeholder="Přezdívka" className="lobby__username" disabled={!this.state.canJoin} type="text" value={this.props.username} onKeyPress={this.handleKey} onChange={this.props.changeName}></input>
-                <button className="lobby__join" disabled={!this.state.canJoin} onClick={this.join}>Připojit se</button>
-                <button className={this.state.ready ? 'lobby__ready--ready lobby__ready' : 'lobby__ready' } disabled={!this.state.canReady} onClick={this.ready}>Začít</button>
-                <div>{(!this.state.canReady && !this.state.canJoin) ? 'Hra už běží!' : this.state.error}</div>
+                <div className="lobby__input">
+                    <input placeholder="Přezdívka" className="lobby__username" disabled={!this.state.canJoin} type="text" value={this.props.username} onKeyPress={this.handleKey} onChange={this.props.changeName}></input>
+                    <button className="lobby__join" disabled={!this.state.canJoin} onClick={this.join}>Připojit</button>
+                    <button className={this.state.ready ? 'lobby__ready--ready lobby__ready' : 'lobby__ready' } disabled={!this.state.canReady} onClick={this.ready}>Začít</button>
+                </div>
+                <div className="lobby__error">{(!this.state.canReady && !this.state.canJoin) ? 'Hra už běží!' : this.state.error}</div>
 
                 <div className="players">
                     <h2 className="players__heading">{this.state.players.length > 0 ? 'Hráči' : ''}</h2>
@@ -78,9 +80,9 @@ class Lobby extends React.Component {
                         {this.state.players.map(p => <li className="players__player">{p.username + ' '} {p.ready ? '✓' : ''}</li>)}
                     </ul> 
                 </div>
-
+                <h2 className="teams__heading">{this.state.teams.length > 0 ? 'Týmy:' : ''}</h2>
                 <div className="teams">
-                    <h2 className="teams__heading">{this.state.teams.length > 0 ? 'Týmy:' : ''}</h2>
+                    
                         {this.state.teams.map((team, i) => 
                         <div className="team">
                             <ul className="team__players">

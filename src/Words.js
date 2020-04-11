@@ -39,14 +39,19 @@ class Words extends React.Component {
     }
   }
 
+  //value={this.state.words} max={this.props.players.length * 3}
+
   render() {
     return (
-      <div>
-        <input disabled={!this.state.canAddWords} value={this.state.textInput} onKeyPress={this.handleKey} onChange={this.handleInput} />
-        <button disabled={!this.state.canAddWords} onClick={this.addWord}>Přidat slovo</button>
-        
-        <p>Slova</p>
-        <progress value={this.state.words} max={this.props.players.length * 3}></progress>
+      <div className="words">
+        <input className="words__input" disabled={!this.state.canAddWords} value={this.state.textInput} onKeyPress={this.handleKey} onChange={this.handleInput} />
+        <button className="words__add" disabled={!this.state.canAddWords} onClick={this.addWord}>Přidat</button>
+
+        <div className="progress">
+          <div className="progress__bar">
+            <div className="progress__filler" style={{width: `${(this.state.words / (this.props.players.length * 3)) * 100}%`}}></div>
+          </div>
+        </div>
       </div>
     )
   }

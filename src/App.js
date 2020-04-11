@@ -1,7 +1,7 @@
 import React from 'react'
 import Lobby from './Lobby'
 import Words from './Words'
-import Description from './Description'
+import Round from './Round'
 
 import io from 'socket.io-client'
 
@@ -17,7 +17,7 @@ class App extends React.Component {
       username: '',
       socket: socket,
       players: [],
-      currentTeam: [],
+      currentTeam: 0,
       teams: [],
       points: []
     }
@@ -58,7 +58,7 @@ class App extends React.Component {
       return <Words players={this.state.players} socket={this.state.socket}/>
     } 
     else if (this.state.gamestate === 'description') {
-      return <Description points={this.state.points} currentTeam={this.state.currentTeam} username={this.state.username} team={this.state.team} teams={this.state.teams} players={this.state.players} socket={this.state.socket}/>
+      return <Round points={this.state.points} currentTeam={this.state.currentTeam} username={this.state.username} team={this.state.team} teams={this.state.teams} players={this.state.players} socket={this.state.socket}/>
     }
     else {
       return <Lobby socket={this.state.socket} join={this.join} changeName={this.changeName} username={this.state.usernameInput}/>
@@ -67,6 +67,9 @@ class App extends React.Component {
   render() {
     return (
       <this.currentGameComponent />
+      //<Round points={this.state.points} currentTeam={this.state.currentTeam} username={this.state.username} team={this.state.team} teams={this.state.teams} players={this.state.players} socket={this.state.socket}/>
+      //<Words players={this.state.players} socket={this.state.socket}/>
+
     )
   }
 }

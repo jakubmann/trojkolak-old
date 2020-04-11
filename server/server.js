@@ -7,30 +7,34 @@ app.listen(3636, () => {
     console.log('Server listenning on port 3636')
 })
 
-function addPoints(player, points) {
-    players[player].points = points
-}
-
 function getPoints() {
     let points = []
-    players.map((player) => {
-        points.push(player.points)
+    teams.map(team => {
+        let teamPoints = 0
+        team.map(player => {
+            teamPoints += player.points
+        })
+        points.push(teamPoints)
     })
 
     return points
 }
 
 //Velky kolo (popis, jednoslovne)
-function bigRound(currentTeam, currentPlayer) {
-    let wordsActive = shuffle(words)
-    let end = false
+function bigRound(words, currentTeam, currentPlayer, lastWord) {
+    let wordsActive = words
+    let noneGuessed = true
     let team = teams[currentTeam]
     io.emit('current-team', currentTeam)
+
+    let word = lastWord
+    if (lastWord === false) {
+        word = wordsActive.pop()
+    } 
 
     //Hracovi co slovo vysvetluje poslat slovo, ostatnim v tymu hadaji slovo
     team.map((player, i) => {
         if (i === currentPlayer) {
-            let word = wordsActive.pop()
             io.to(player.id).emit('playing', word)
         } else {
             io.to(player.id).emit('guessing')
@@ -38,54 +42,73 @@ function bigRound(currentTeam, currentPlayer) {
     })
 
     //minuta na hadani slov
-    let time = 60
+    let time = 10
     let timer = setInterval(() => {
         io.emit('time', time)
         time--
-        if (time < 1 || wordsActive.length === 0) {
+        if (time < 1) {
             io.emit('time', time)
             io.emit('round-end')
             io.emit('update-points', getPoints())
-            end = true
             clearInterval(timer)
+            clearInterval(guessing)
+
+            //bigRound s dalsim tymem
+            if (currentTeam === teams.length - 1) {
+                if (currentPlayer === teams[currentTeam].length - 1) {
+                    currentPlayer = 0
+                }
+                else {
+                    currentPlayer++
+                }
+                currentTeam = 0
+            }
+            else {
+                currentTeam++
+            }
+
+            console.log('start next round')
+            
+            io.emit('round-end')
+            let lastWord = word
+            if (noneGuessed) {
+                lastWord = false
+            }
+            bigRound(wordsActive, currentTeam, currentPlayer, lastWord)
+            
         }
     }, 1000)
 
-    //Pri uhadnuti pridat body
-    io.on('guessed', () => {
-        addPoints(currentPlayer, 1)
-    })
-
-    //Kdyz dojdou slova ukoncit kolo
-    if (wordsActive.length === 0) {
-        io.emit('biground-end')
-        console.log('biground end')
-    }
-    //Jinak zavolat bigRound s dalsim tymem
-    else if (end) {
-        if (currentPlayer == currentTeam.length-1) {
-            if (currentTeam == teams.length -1) {
-                currentTeam = 0
-            } else {
-                currentPlayer = 0
-                currentTeam++
+    let guessing = setInterval(() => {
+        //Pri uhadnuti pridat body
+        if (guessed) {
+            noneGuessed = false
+            if (wordsActive.length > 0) {
+                word = wordsActive.pop()
+                io.to(teams[currentTeam][currentPlayer].id).emit('playing', word)
+                console.log('guessed!')
+                teams[currentTeam][currentPlayer].points++
+                io.emit('update-points', getPoints())
+                
+                guessed = false
             }
-        } else {
-            currentPlayer++
+            //Kdyz dojdou slova ukoncit kolo
+            else {
+                io.emit('biground-end')
+                console.log('big round end')
+                clearInterval(guessing)
+                clearInterval(timer)
+            }
         }
-
-        io.on('startgame', () => {
-            console.log('start next round')
-            //bigRound(currentTeam, currentPlayer, socket)
-        })
-    }
+    }, 10)
 }
 
 
 let players = []
 let words = []
 let teams = []
-let points = []
+
+let guessed = false
 
 let gameStarted = false
 
@@ -119,7 +142,8 @@ io.on('connection', (socket) => {
 
         if (words.length == players.length * 3) {
             io.emit('gamestate', 'description')
-            bigRound(0, 0)
+            let wordsActive = shuffle(words)
+            bigRound(wordsActive, 0, 0, false)
         }
     })
 
@@ -165,7 +189,6 @@ io.on('connection', (socket) => {
                         players.map((player, i) => {
                             team.push(player)
                             if (team.length == teamsize) {
-                                points.push(0)
                                 teams.push(team)
                                 team = []
                             }
@@ -188,10 +211,14 @@ io.on('connection', (socket) => {
                             })
                             //io.to(player.id).emit('team', playerTeam)
                         })
-                    }, 100000)
+                    }, 5000)
                 }   
             }
         }
+    })
+
+    socket.on('guessed', () => {
+        guessed = true
     })
 
     socket.on('disconnect', () => {
