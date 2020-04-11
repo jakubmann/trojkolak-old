@@ -42,7 +42,7 @@ function bigRound(words, currentTeam, currentPlayer, lastWord) {
     })
 
     //minuta na hadani slov
-    let time = 10
+    let time = 60
     let timer = setInterval(() => {
         io.emit('time', time)
         time--
