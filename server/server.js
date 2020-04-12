@@ -2,10 +2,40 @@ let app = require('http').createServer()
 let io = require('socket.io')(app)
 
 
+let players = []
+let words = []
+let teams = []
+
+let guessed = false
+let gameStarted = false
+let nextRound = false
+
+let currentPlayer = 0
+let currentTeam = 0
+
+let round = 1
+let timeLeft = 0
+
+
 
 app.listen(3636, () => {
     console.log('Server listenning on port 3636')
 })
+
+nextPlayer = () => {
+    if (currentTeam === teams.length - 1) {
+        if (currentPlayer === teams[currentTeam].length - 1) {
+            currentPlayer = 0
+        }
+        else {
+            currentPlayer++
+        }
+        currentTeam = 0
+    }
+    else {
+        currentTeam++
+    }
+}
 
 function getPoints() {
     let points = []
@@ -21,14 +51,17 @@ function getPoints() {
 }
 
 //Velky kolo (popis, jednoslovne)
-function wordRound(words, lastWord, round = false) {
-    let wordsActive = words
+wordRound = (wordsActive, lastWord) => {
     let noneGuessed = true
     let team = teams[currentTeam]
     io.emit('current-team', currentTeam)
-
+    let time = 60
+    if (timeLeft !== 0) {
+        time = timeLeft
+        timeLeft = 0
+    }
     let word = lastWord
-    if (lastWord === false) {
+    if (!lastWord) {
         word = wordsActive.pop()
     } 
 
@@ -42,13 +75,11 @@ function wordRound(words, lastWord, round = false) {
     })
 
     //minuta na hadani slov
-    let time = 10
+    
     let timer = setInterval(() => {
-        console.log(time)
         io.emit('time', time)
         time--
         if (time < 1) {
-            console.log(time)
             
             clearInterval(timer)
             clearInterval(guessing)
@@ -66,18 +97,7 @@ function wordRound(words, lastWord, round = false) {
                     lastWord = false
                 }
                 
-                if (currentTeam === teams.length - 1) {
-                    if (currentPlayer === teams[currentTeam].length - 1) {
-                        currentPlayer = 0
-                    }
-                    else {
-                        currentPlayer++
-                    }
-                    currentTeam = 0
-                }
-                else {
-                    currentTeam++
-                }
+                nextPlayer()
 
                 io.emit('time', time)
                 console.log('start next round')
@@ -103,6 +123,7 @@ function wordRound(words, lastWord, round = false) {
     let guessing = setInterval(() => {
         //Pri uhadnuti pridat body
         if (guessed) {
+            io.emit('canvas-clear')
             teams[currentTeam][currentPlayer].points++
             io.emit('update-points', getPoints())
 
@@ -110,18 +131,20 @@ function wordRound(words, lastWord, round = false) {
             if (wordsActive.length > 0) {
                 word = wordsActive.pop()
                 io.to(teams[currentTeam][currentPlayer].id).emit('playing', word)
-                console.log('guessed!')
                 
                 
                 guessed = false
             }
             //Kdyz dojdou slova ukoncit kolo
             else {
+                io.emit('round-end')
                 io.emit('biground-end')
-                io.emit('gamestate', 'oneword')
-                console.log('END OF FIRST ROUND')
+                timeLeft = time
+                round++
+                startGame()
                 clearInterval(guessing)
                 clearInterval(timer)
+                return true
             }
 
         }
@@ -129,25 +152,48 @@ function wordRound(words, lastWord, round = false) {
 }
 
 
-let players = []
-let words = []
-let teams = []
-
-let guessed = false
-let gameStarted = false
-let nextRound = false
-
-let currentPlayer = 0
-let currentTeam = 0
-
-
 
 function shuffle(a) {
-    for (let i = a.length - 1; i > 0; i--) {
+    let b = a;
+    for (let i = b.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
+        [b[i], b[j]] = [b[j], b[i]];
     }
-    return a;
+    return b;
+}
+
+startGame = () => {
+    if (round === 1) {
+        io.emit('gamestate', 'description')
+        console.log('DESC ROUND STARTED')
+    } else if (round === 2) {
+        io.emit('gamestate', 'oneword')
+        console.log('ONEWORD ROUND STARTED')
+    } else if (round === 3) {
+        io.emit('gamestate', 'draw')
+        console.log('DRAW ROUND STARTED')
+    } 
+    if (round === 4) {
+        io.emit('allwords', words)
+        io.emit('gamestate', 'leaderboard')
+        console.log('END GAME')
+    }
+    else {
+        let wordsActive = shuffle(words.concat())
+        
+        console.log(wordsActive === words)
+
+        io.to(teams[currentTeam][currentPlayer].id).emit('start-round')
+        io.emit('update-points', getPoints())
+
+        let nextRoundTimer = setInterval(() => {
+            if (nextRound) {
+                wordRound(wordsActive, false)
+                nextRound = false
+                clearInterval(nextRoundTimer)
+            }
+        }, 10)
+    }
 }
 
 io.on('connection', (socket) => {
@@ -164,25 +210,14 @@ io.on('connection', (socket) => {
     //Pridani slova do seznamu slov
     socket.on('word', (word) => {
         let username = players.filter(p => p.id == socket.id)[0].username
-        words.push({player: socket.id, username: username, word: word, used: false})
-        if (words.filter(w => w.player == socket.id).length == 3) {
+        words.push({player: socket.id, username: username, word: word})
+        if (words.filter(w => w.player == socket.id).length == 5) {
             io.to(socket.id).emit('max-words')
         }
         io.emit('update-words', words.length)
 
-        if (words.length == players.length * 3) {
-            io.emit('gamestate', 'description')
-            let wordsActive = shuffle(words)
-            io.to(teams[0][0].id).emit('start-round')
-            io.emit('update-points', getPoints())
-
-            let nextRoundTimer = setInterval(() => {
-                if (nextRound) {
-                    wordRound(wordsActive, false)
-                    nextRound = false
-                    clearInterval(nextRoundTimer)
-                }
-            }, 10)
+        if (words.length == players.length * 5) {
+            startGame()
         }
     })
 
@@ -264,10 +299,22 @@ io.on('connection', (socket) => {
         nextRound = true
     })
 
+    socket.on('canvas-isdrawing', (data) => {
+        socket.broadcast.emit('canvas-isdrawing', data)
+    })
+
+    socket.on('canvas-changedata', (data) => {
+        socket.broadcast.emit('canvas-changedata', data)
+    })
+
+    socket.on('canvas-mousedrag', (data) => {
+        socket.broadcast.emit('canvas-mousedrag', data)
+    })
+
+
     socket.on('disconnect', () => {
         players = players.filter(p => p.id != socket.id)
         io.emit('update-players', players)
     })
-
 }) 
 

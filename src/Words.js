@@ -30,7 +30,7 @@ class Words extends React.Component {
 
   addWord = () => {
     this.props.socket.emit('word', this.state.textInput)
-    //this.setState({ textInput: '' })
+    this.setState({ textInput: '' })
   }
 
   handleKey = (e) => {
@@ -38,16 +38,6 @@ class Words extends React.Component {
       this.addWord()
     }
   }
-
-  componentDidMount = () => {
-    for (let i = 0; i < 3; i++) {
-      window.setTimeout(() => {
-        this.setState({textInput: Math.floor(Math.random() * 1000).toString()})
-        this.addWord()
-      }, i * 800)
-    }
-  }
-
 
 
   render() {
@@ -58,7 +48,7 @@ class Words extends React.Component {
 
         <div className="progress">
           <div className="progress__bar">
-            <div className="progress__filler" style={{width: `${(this.state.words / (this.props.players.length * 3)) * 100}%`}}></div>
+            <div className="progress__filler" style={{width: `${(this.state.words / (this.props.players.length * 5)) * 100}%`}}></div>
           </div>
         </div>
       </div>

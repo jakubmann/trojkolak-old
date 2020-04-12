@@ -1,8 +1,8 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
 import Lobby from './Lobby'
 import Words from './Words'
 import Round from './Round'
+import Leaderboard from './Leaderboard'
 
 
 import io from 'socket.io-client'
@@ -15,8 +15,8 @@ class App extends React.Component {
 
     this.state = {
       gamestate: '',
-      //usernameInput: '',
-      usernameInput: Math.floor(Math.random() * 1000).toString(),
+      usernameInput: '',
+      //usernameInput: Math.floor(Math.random() * 1000).toString(),
       username: '',
       socket: socket,
       players: [],
@@ -24,8 +24,13 @@ class App extends React.Component {
       teams: [],
       points: [],
       splash: false,
-      round: 0
+      round: 1,
+      words: []
     }
+
+    socket.on('allwords', (words) => {
+      this.setState({words: words})
+    })
 
     socket.on('update-players', (players) => {
       this.setState({players: players})
@@ -39,6 +44,10 @@ class App extends React.Component {
       }
       else if (state == 'oneword') {
         this.setState({round: 2})
+        this.showSplash()
+      }
+      else if (state == 'draw') {
+        this.setState({round: 3})
         this.showSplash()
       }
     })
@@ -82,8 +91,11 @@ class App extends React.Component {
     if (this.state.gamestate === 'words') {
       return <Words players={this.state.players} socket={this.state.socket}/>
     } 
-    else if (this.state.gamestate === 'description' || this.state.gamestate === 'oneword') {
+    else if (this.state.gamestate === 'description' || this.state.gamestate === 'oneword' || this.state.gamestate === 'draw') {
       return <Round hidden={this.state.splash} round={this.state.round} points={this.state.points} currentTeam={this.state.currentTeam} username={this.state.username} team={this.state.team} teams={this.state.teams} players={this.state.players} socket={this.state.socket}/>
+    }
+    else if (this.state.gamestate === 'leaderboard') {
+      return <Leaderboard words={this.state.words} points={this.state.points} teams={this.state.teams} />
     }
     else {
       return <Lobby socket={this.state.socket} join={this.join} changeName={this.changeName} username={this.state.usernameInput}/>
@@ -91,17 +103,18 @@ class App extends React.Component {
   }
   render() {
     return (
+
       <div>
         {this.state.splash ?
-        <div class="splash"><h1 className="splash__text">{this.state.round}. Kolo</h1></div>
+        <div className="splash"><h1 className="splash__text">{this.state.round}. Kolo</h1></div>
         :
         ''
         }
         <this.currentGameComponent />
       </div>
-        
-      //<Round points={this.state.points} currentTeam={this.state.currentTeam} username={this.state.username} team={this.state.team} teams={this.state.teams} players={this.state.players} socket={this.state.socket}/>
-      //<Words players={this.state.players} socket={this.state.socket}/>
+
+      //<Round round={this.state.round} points={this.state.points} currentTeam={this.state.currentTeam} username={this.state.username} team={this.state.team} teams={this.state.teams} players={this.state.players} socket={this.state.socket}/>
+
 
     )
   }

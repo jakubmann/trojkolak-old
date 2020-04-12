@@ -61,15 +61,8 @@ class Lobby extends React.Component {
         this.setState({ready: this.state.ready ? false : true})
         window.setTimeout(() => {
             this.props.socket.emit('ready', this.state.ready)
-        }, 5000)
-    }
-
-
-    componentDidMount = () => {
-        this.join()
-        window.setTimeout(() => {
-            this.ready()
-        }, 1000)
+        }, 500)
+            
     }
 
     render() {
