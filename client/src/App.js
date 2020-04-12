@@ -11,7 +11,7 @@ class App extends React.Component {
   constructor() {
     super()
 
-    const socket = io('localhost:5000')
+    const socket = io(location.origin + ':5000')
 
 
     this.state = {
