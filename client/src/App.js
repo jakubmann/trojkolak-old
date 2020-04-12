@@ -10,9 +10,9 @@ import io from 'socket.io-client'
 class App extends React.Component {
   constructor() {
     super()
-    let port = process.env.PORT || 5000
 
-    const socket = io('http://localhost:' + port)
+
+    const socket = io()
 
 
     this.state = {
