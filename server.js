@@ -1,5 +1,17 @@
-let app = require('http').createServer()
-let io = require('socket.io')(app)
+const express = require('express')
+
+const app = express()
+
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+const path = require('path')
+
+
+
+app.use('/', express.static(path.join(__dirname, 'client/build/')));
+
+server.listen(5000);
+
 
 
 let players = []
@@ -16,11 +28,12 @@ let currentTeam = 0
 let round = 1
 let timeLeft = 0
 
+let gamestate = 'lobby'
 
 
-app.listen(3636, () => {
-    console.log('Server listenning on port 3636')
-})
+let playingRound = false
+
+let word = ''
 
 nextPlayer = () => {
     if (currentTeam === teams.length - 1) {
@@ -60,7 +73,7 @@ wordRound = (wordsActive, lastWord) => {
         time = timeLeft
         timeLeft = 0
     }
-    let word = lastWord
+    word = lastWord
     if (!lastWord) {
         word = wordsActive.pop()
     } 
@@ -106,9 +119,10 @@ wordRound = (wordsActive, lastWord) => {
                 
                 io.emit('round-end')
                 
-
+                playingRound = false
                 let nextRoundTimer = setInterval(() => {
                     if (nextRound) {
+                        playingRound = true
                         wordRound(wordsActive, lastWord)
                         nextRound = false
                         clearInterval(nextRoundTimer)
@@ -164,18 +178,20 @@ function shuffle(a) {
 
 startGame = () => {
     if (round === 1) {
-        io.emit('gamestate', 'description')
+        gamestate = 'description'
         console.log('DESC ROUND STARTED')
     } else if (round === 2) {
-        io.emit('gamestate', 'oneword')
+        gamestate = 'oneword'
         console.log('ONEWORD ROUND STARTED')
     } else if (round === 3) {
-        io.emit('gamestate', 'draw')
+        gamestate = 'draw'
         console.log('DRAW ROUND STARTED')
     } 
+    io.emit('gamestate', gamestate)
     if (round === 4) {
         io.emit('allwords', words)
-        io.emit('gamestate', 'leaderboard')
+        gamestate = 'leaderboard'
+        io.emit('gamestate', gamestate)
         console.log('END GAME')
     }
     else {
@@ -188,6 +204,7 @@ startGame = () => {
 
         let nextRoundTimer = setInterval(() => {
             if (nextRound) {
+                playingRound = true
                 wordRound(wordsActive, false)
                 nextRound = false
                 clearInterval(nextRoundTimer)
@@ -198,12 +215,15 @@ startGame = () => {
 
 io.on('connection', (socket) => {
 
+    /*
     if (players.filter(p => p.id == socket.id).length === 0 && gameStarted) {
-        io.to(socket.id).emit('cant-play')
+            io.to(socket.id).emit('cant-play')
     } else {
-        io.emit('update-players', players)
-        io.emit('update-teams', teams)
+        io.to(socket.id).emit('gamestate', gamestate)
+        io.to(socket.id).emit('update-players', players)
+        io.to(socket.id).emit('update-teams', teams)
     }
+    */
 
     io.emit('update-players', players)
 
@@ -271,8 +291,10 @@ io.on('connection', (socket) => {
                     io.emit('update-teams', teams)
 
                     gameStarted = true
+                    io.emit('gamestarted')
                     setTimeout(() => {
-                        io.emit('gamestate', 'words')
+                        gamestate = 'words'
+                        io.emit('gamestate', gamestate)
                     
                         players.map(player => {
                             let playerTeam = []
@@ -312,9 +334,63 @@ io.on('connection', (socket) => {
     })
 
 
-    socket.on('disconnect', () => {
+    socket.on('reconnected', (username) => {
+        players.map(p => {
+            if (p.username === username) {
+                p.id = socket.id
+            }
+        })
+
+        io.to(socket.id).emit('gamestate', gamestate)
+        io.to(socket.id).emit('update-players', players)
+        io.to(socket.id).emit('update-teams', teams)
+        io.to(socket.id).emit('update-points', getPoints())
+        io.to(socket.id).emit('update-words', words.length)
+
+        if (!playingRound && gameStarted) {
+            if (socket.id === teams[currentTeam][currentPlayer].id) {
+                io.to(socket.id).emit('start-round')
+            }
+        }
+
+        if (playingRound) {
+            if (socket.id === teams[currentTeam][currentPlayer].id) {
+                io.to(socket.id).emit('playing', word)
+            } else {
+                teams[currentTeam].map(p => {
+                    if (p.id === socket.id && socket.id !== teams[currentTeam][currentPlayer].id) {
+                        io.to(socket.id).emit('guessing')
+                    }
+                })
+            }
+        }
+    })
+
+    socket.on('leave', () => {
+        io.to(socket.id).emit('gamestate', 'lobby')
         players = players.filter(p => p.id != socket.id)
         io.emit('update-players', players)
+
+        if (players.length === 0) {
+            players = []
+            words = []
+            teams = []
+
+
+            gameStarted = false
+
+
+            currentPlayer = 0
+            currentTeam = 0
+
+            round = 1
+            timeLeft = 0
+
+            playingRound = false
+            word = ''
+            
+        }
+
     })
 }) 
 

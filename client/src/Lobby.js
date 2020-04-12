@@ -7,11 +7,13 @@ class Lobby extends React.Component {
         this.state = {
             players: [],
             teams: [],
-            canJoin: true,
-            canReady: false,
+            canJoin: localStorage.getItem('username') ? false : true,
+            canReady: localStorage.getItem('username') ? true : false,
             ready: false,
             error: ''
         }
+
+
 
         this.props.socket.on('update-players', (players) => {
             console.log(players)
@@ -21,11 +23,11 @@ class Lobby extends React.Component {
             })
         })
 
-        this.props.socket.on('gamestatus', (status) => {
-            if (status === 'started') {
-                this.setState({canJoin: false})
-                this.setState({canReady: false})
-            }
+        this.props.socket.on('gamestarted', () => {
+
+            this.setState({canJoin: false})
+            this.setState({canReady: false})
+
         })
 
         this.props.socket.on('update-teams', (teams) => {
@@ -42,6 +44,7 @@ class Lobby extends React.Component {
         this.props.socket.on('error', (message) => {
             this.setState({error: message})
         })
+
     }
 
     join = () => {
@@ -65,13 +68,17 @@ class Lobby extends React.Component {
             
     }
 
+
     render() {
         return (
             <div className="lobby">
                 <div className="lobby__input">
                     <input placeholder="Přezdívka" className="lobby__username" disabled={!this.state.canJoin} type="text" value={this.props.username} onKeyPress={this.handleKey} onChange={this.props.changeName}></input>
                     <button className="lobby__join" disabled={!this.state.canJoin} onClick={this.join}>Připojit</button>
-                    <button className={this.state.ready ? 'lobby__ready--ready lobby__ready' : 'lobby__ready' } disabled={!this.state.canReady} onClick={this.ready}>Začít</button>
+                    <div className="lobby__buttons">
+                        <button className={this.state.ready ? 'lobby__ready--ready lobby__ready' : 'lobby__ready' } disabled={!this.state.canReady} onClick={this.ready}>Začít</button>
+                        <button className="lobby__leave" disabled={!this.state.canReady} onClick={this.props.leave}>Odejít</button>
+                    </div>
                 </div>
                 <div className="lobby__error">{(!this.state.canReady && !this.state.canJoin) ? 'Hra už běží!' : this.state.error}</div>
 

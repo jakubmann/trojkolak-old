@@ -11,7 +11,8 @@ class App extends React.Component {
   constructor() {
     super()
 
-    const socket = io('localhost:3636')
+    const socket = io('localhost:5000')
+
 
     this.state = {
       gamestate: '',
@@ -37,16 +38,17 @@ class App extends React.Component {
     })
     
     socket.on('gamestate', (state) => {
+      console.log(state)
       this.setState({gamestate: state})
-      if (state == 'description') {
+      if (state === 'description') {
         this.setState({round: 1})
         this.showSplash()
       }
-      else if (state == 'oneword') {
+      else if (state === 'oneword') {
         this.setState({round: 2})
         this.showSplash()
       }
-      else if (state == 'draw') {
+      else if (state === 'draw') {
         this.setState({round: 3})
         this.showSplash()
       }
@@ -78,6 +80,7 @@ class App extends React.Component {
   }
 
   join = () => {
+    localStorage.setItem('username', this.state.usernameInput)
     this.state.socket.emit('join', this.state.usernameInput)
     this.setState({username: this.state.usernameInput})
     this.setState({usernameInput: ''})
@@ -87,6 +90,13 @@ class App extends React.Component {
     this.setState({usernameInput: e.target.value})
   }
 
+  leave = () => {
+    this.state.socket.emit('leave')
+    localStorage.clear()
+  }
+
+  
+
   currentGameComponent = () => {
     if (this.state.gamestate === 'words') {
       return <Words players={this.state.players} socket={this.state.socket}/>
@@ -95,12 +105,24 @@ class App extends React.Component {
       return <Round hidden={this.state.splash} round={this.state.round} points={this.state.points} currentTeam={this.state.currentTeam} username={this.state.username} team={this.state.team} teams={this.state.teams} players={this.state.players} socket={this.state.socket}/>
     }
     else if (this.state.gamestate === 'leaderboard') {
-      return <Leaderboard words={this.state.words} points={this.state.points} teams={this.state.teams} />
+      return <Leaderboard leave={this.leave} words={this.state.words} points={this.state.points} teams={this.state.teams} />
     }
     else {
-      return <Lobby socket={this.state.socket} join={this.join} changeName={this.changeName} username={this.state.usernameInput}/>
+      return <Lobby leave={this.leave} socket={this.state.socket} join={this.join} changeName={this.changeName} username={this.state.usernameInput}/>
     }
   }
+
+  componentDidMount() {
+    let username = localStorage.getItem('username')
+    if (username) {
+      alert(localStorage.getItem('username'))
+      this.state.socket.emit('reconnected', username)
+      this.setState({
+        username: username
+      })
+    }
+  }
+
   render() {
     return (
 

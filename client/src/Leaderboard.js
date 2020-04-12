@@ -1,13 +1,13 @@
 import React from 'react'
 
 class Leaderboard extends React.Component {
-    constructor(props) {
-        super(props)
 
-
+    componentDidMount() {
+        window.addEventListener("onbeforeunload", () => {
+            this.props.leave()
+            alert("YOU LEFT")
+        })
     }
-
-    
 
     render() {
         return (
@@ -23,7 +23,7 @@ class Leaderboard extends React.Component {
                         <div className="leaderboard__points">Body: { this.props.points[i]}</div>
                     </div>
                 )}
-
+                <button className="leaderboard__leave" onClick={this.props.leave}>Odejít</button>
                 <h2 className="leaderboard__words">SLOVA</h2>
                 {this.props.words.map(word => 
                     <p className="leaderboard__word">{word.word}</p>

@@ -14,6 +14,21 @@ class Round extends React.Component {
             splash: false
         }
 
+
+    }
+
+    guessed = () => {
+        this.props.socket.emit('guessed')
+    }
+
+    startNextRound  = () => {
+        this.props.socket.emit('next-round')
+        this.setState({
+            startRound: false
+        })
+    }
+
+    componentDidMount() {
         const socket = this.props.socket
 
         socket.on('playing', (word) => {
@@ -48,17 +63,6 @@ class Round extends React.Component {
                 time: time,
                 roundEnd: time === 0
             })
-        })
-    }
-
-    guessed = () => {
-        this.props.socket.emit('guessed')
-    }
-
-    startNextRound  = () => {
-        this.props.socket.emit('next-round')
-        this.setState({
-            startRound: false
         })
     }
 
