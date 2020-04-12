@@ -2,15 +2,15 @@ const express = require('express')
 
 const app = express()
 
-const server = require('http').Server(app);
-const io = require('socket.io')(server);
+
 const path = require('path')
 
+const PORT = process.env.PORT || 5000
 
 
-app.use('/', express.static(path.join(__dirname, 'client/')));
-
-server.listen(5000);
+app.use('/', express.static(path.join(__dirname, 'client/build/')))
+const server = app.listen(PORT, () => console.log(`Listening on ${PORT}`));
+const io = require('socket.io').listen(server);
 
 
 
