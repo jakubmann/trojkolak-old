@@ -215,7 +215,6 @@ startGame = () => {
 
 io.on('connection', (socket) => {
 
-    /*
     if (players.filter(p => p.id == socket.id).length === 0 && gameStarted) {
             io.to(socket.id).emit('cant-play')
     } else {
@@ -223,7 +222,7 @@ io.on('connection', (socket) => {
         io.to(socket.id).emit('update-players', players)
         io.to(socket.id).emit('update-teams', teams)
     }
-    */
+
 
     io.emit('update-players', players)
 

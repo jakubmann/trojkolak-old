@@ -3,10 +3,7 @@ import React from 'react'
 class Leaderboard extends React.Component {
 
     componentDidMount() {
-        window.addEventListener("onbeforeunload", () => {
-            this.props.leave()
-            alert("YOU LEFT")
-        })
+        this.props.leave()
     }
 
     render() {
