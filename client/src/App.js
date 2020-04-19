@@ -81,7 +81,7 @@ class App extends React.Component {
   }
 
   join = () => {
-    localStorage.setItem('username', this.state.usernameInput)
+    //localStorage.setItem('username', this.state.usernameInput)
     this.state.socket.emit('join', this.state.usernameInput)
     this.setState({username: this.state.usernameInput})
     this.setState({usernameInput: ''})

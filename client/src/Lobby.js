@@ -7,8 +7,8 @@ class Lobby extends React.Component {
         this.state = {
             players: [],
             teams: [],
-            canJoin: localStorage.getItem('username') ? false : true,
-            canReady: localStorage.getItem('username') ? true : false,
+            canJoin: /*localStorage.getItem('username') ? false : true, */ true,
+            canReady: /*localStorage.getItem('username') ? true : false, */ false,
             ready: false,
             error: ''
         }
